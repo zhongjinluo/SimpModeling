@@ -82,30 +82,23 @@
     <h3 class="w3-left-align" id="intro"><b>Demo</b></h3>
     <center>
         <iframe width="850" height="480" src="https://www.youtube.com/embed/PcbjgoPzd_A" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-    </center>
+    </center><br>
 
     <h3 class="w3-left-align" id="publication"><b>Publication</b></h3>
-    Paper - <a target="__blank">ArXiv - pdf</a> (<a target="__blank">abs</a>)  | <a href="https://github.com/zhongjinluo/SimpModeling" target="__blank">GitHub</a>
+    Paper - <a target="__blank">ArXiv - pdf</a> (<a target="__blank">abs</a>) (Coming soon...)  | <a href="https://github.com/zhongjinluo/SimpModeling" target="__blank">Code</a> | <a target="__blank">Dataset (Coming soon...)</a>
     <p>If you find our work useful, please consider citing it:</p>
     <pre class="w3-panel w3-leftbar w3-light-grey" style="white-space: pre-wrap; font-family: monospace; font-size: 11px">
 
-@misc{luo2021SimpModeling,
+@article{luo2021SimpModeling,
       title={SimpModeling: Sketching Implicit Field to Guide Mesh Modeling for 3D Animalmorphic Head Design}, 
-      author={Zhongjin Luo and Jie Zhou and Heming Zhu and Dong Du and Xiaoguang Han and Hongbo Fu},
-      year={2021},
-      eprint={xxx},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV}
+      author={Zhongjin Luo and Jie Zhou and Heming Zhu and Dong Du and Xiaoguang Han and Hongbo Fu}
 }
         </pre>
 
-        <HR>        
+        <!-- <HR>         -->
         <h3 class="w3-left-align" id="dataset"><b>Dataset</b></h3>
-
-            We propose <i>3DAnimalHead</i>, the largest animalmorphic head dataset by far. Our dataset contains 1,955 high-quality animalmorphic head models manually created by artists, covering 17 common categories. Each animalmorphic head is carefully annotated with contour curves to facilitate future research on 3D animalmorphic head generation.
+        <p>We propose <i>3DAnimalHead</i>, the largest animalmorphic head dataset by far. Our dataset contains 1,955 high-quality animalmorphic head models manually created by artists, covering 17 common categories. Each animalmorphic head is carefully annotated with contour curves to facilitate future research on 3D animalmorphic head generation.</p>
         
-        <center>
-        </center><br>
         <h5 class="w3-text-grey" id="dataset_exam"><b>Data Examples</b></h3>
   
         <center>
@@ -128,7 +121,7 @@
         </p>
         
         <!--<h5 class="w3-text-grey" id="dataset_anno"><b>Dataset Annotations</b></h3>-->
-        <HR>
+        <!-- <HR> -->
         <h3 class="w3-left-align" id="experiments"><b>Evaluation</b></h3>
         <h5 class="w3-text-grey" id="exp_comp"><b>Usability Study</b></h3>
         <p>
@@ -157,7 +150,7 @@
         <h5 class="w3-text-grey" id="exp_rigging"><b>Comparison Study</b></h3>
         <p>
             After thoroughly reviewing the existing open-source sketch-based modeling systems, we choose
-            FiberMesh[23] and SAniHead[8], which are most relevant to our work, for comparison. In the Comparison Study, each user was
+            <a href="https://dl.acm.org/doi/10.1145/1276377.1276429">FiberMesh</a> and <a href="https://ieeexplore.ieee.org/document/9222121">SAniHead</a>, which are most relevant to our work, for comparison. In the Comparison Study, each user was
             given different reference images and asked to create 3D animalmorphic heads according to the reference image with
             three systems(our system, FiberMesh, and SAniHead) in a randomized order. For each system, the participants
             were given at most 15 minutes. Note that the created 3D model was not required to strictly follow the reference image
