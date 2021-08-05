@@ -55,7 +55,7 @@
         
     <br>
     <center>
-    <img src="paper-teaser.png" style="max-width:95%"/></a>
+    <img src="paper-teaser.png" style="max-width:90%"/></a>
     </center>
     <br>
 
@@ -105,7 +105,7 @@
         <h5 class="w3-text-grey" id="dataset_exam"><b>Data Examples</b></h3>
   
         <center>
-            <img src="paper-dataset.png" style="max-width:95%" /></a>
+            <img src="paper-dataset.png" style="max-width:90%" /></a>
         </center><br>    
         <p class="center_text" align="center">
         Figure 2. Examples of <i>3DAnimalHead</i>.
@@ -113,23 +113,14 @@
         
         <h5 class="w3-text-grey" id="dataset_stat"><b>Dataset Statistics</b></h3>
         <p>
-            We quantitatively analyze our dataset by comparing the shape variations with two normal face datasets (FaceWarehouse and FaceScape), as well as one synthetic caricature dataset, FaceWarehouse with deformation (Aug. FaceWarehouse). We measure the shape variation using global and part variance. In particular, the variance is computed between the models and their corresponding mean shape of each dataset in terms of per-vertex displacement. The results are presented below. The shape diversity of our dataset is richer than the normal ones. For most of the face regions, 3DCaricShop has larger shape variance than Aug. FaceWarehouse. 
+            Table 1 shows the dataset statistics for SAniHead and our proposed 3DAnimalHead. As seen, <i>3DAnimalHead</i> is one scale larger than SAniHead and enjoys much better data balance across categories.
         </p>
 
         <center>
-            <table border='1px' style='text-align:center;width:80%'>
-            <tr>
-            <th> Dataset </th> <th> Global </th> <th> Eye </th> <th> Nose </th> <th> Mouth </th> <th> Ear </th> <th> Cheek </th> <th> Face</th>
-            </tr>
-            <tr><td> FaceWarehouse</td><td>3.41</td><td> 0.71 </td><td>0.61 </td> <td> 2.60 </td><td> 4.41 </td><td> 1.43 </td><td> 3.40 </td> </tr>
-            <tr><td> FaceScape</td><td>2.17</td><td> 0.36</td><td>0.15</td> <td> 2.63 </td><td> 5.57 </td><td> 1.24 </td><td> 2.27 </td> </tr>
-            <tr><td> Aug. FaceWarehouse</td> <td>5.06</td> <td>1.98</td> <td><strong>6.29</strong> </td> <td>2.07 </td> <td> <strong>9.38</strong> </td><td> 5.26 </td> <td> 5.10 </td> </tr>
-            <tr><td> 3DCaricShop</td> <td> <strong>8.26</strong></td> <td>  <strong>4.68</strong></td> <td>3.04</td> <td> <strong>10.90</strong></td> <td> 9.02 </td> <td> <strong>8.27</strong> </td><td> <strong>6.95</strong> </td> </tr>
-
-            </table>
-        </center>
-            <p class="center_text" align="center">
-            Table 1: The shape variation for 3d face datasets. <!--Note that FaceWarehouse and FaceScape are two normal face datasets, while Aug.FaceWarehouse is a synthetic caricature dataset with deformation.-->
+            <img src="paper-table.png" style="max-width:100%" /></a>
+        </center><br>
+        <p class="center_text" align="center">
+            Table 1: Dataset statistics for SAniHead and our proposed 3DAnimalHead. <!--Note that FaceWarehouse and FaceScape are two normal face datasets, while Aug.FaceWarehouse is a synthetic caricature dataset with deformation.-->
         </p>
         
         <!--<h5 class="w3-text-grey" id="dataset_anno"><b>Dataset Annotations</b></h3>-->
@@ -153,7 +144,7 @@
         </p>   
         
         <!-- <center>
-            <img src="paper-gallery.jpg" style="max-width:100%" /></a>
+            <img src="paper-gallery.jpg" style="max-width:90%" /></a>
         </center><br>  
         <p class="center_text" align="center">
             Figure 3 :Results gallery.
@@ -170,7 +161,7 @@
         </p>
      
         <center>
-            <img src="paper-comparison.png" style="max-width:80%" /></a>
+            <img src="paper-comparison.png" style="max-width:100%" /></a>
         </center><br>  
         <p class="center_text" align="center">
             Figure 4. The models created in the comparison study.
@@ -178,7 +169,7 @@
         <h5 class="w3-text-grey" id="exp_comp"><b>Results Gallery</b></h3>
         <p>Figure 5 are sampled results created by amateur users using our system. As seen, given limited time, novice users working with our system can create models with visually appealing shapes and vivid details easily with a few sketch strokes.</p>
         <center>
-            <img src="paper-gallery.png" style="max-width:95%" /></a>
+            <img src="paper-gallery.png" style="max-width:100%" /></a>
         </center><br>  
         <p class="center_text" align="center">
             Figure 5. Results created by amateur users using our system.
