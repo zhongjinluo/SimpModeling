@@ -8,3 +8,5 @@ We present *SimpModeling*, a novel sketching system designed for amateur users t
 <img src="./docs/paper-teaser.png" width="100%"/>
 </center>
 
+Coming soon ...
+
