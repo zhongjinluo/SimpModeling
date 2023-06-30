@@ -11,7 +11,9 @@ This repository includes the prototype system of *SimpModeling*.
 <center>
 <img src="./docs/paper-teaser.png" width="100%"/>
 </center>
-We present *SimpModeling*, a novel sketching system designed for amateur users to create desired animalmorphic heads. It provides two stages for mesh modeling: coarse shape sketching where users may create coarse head models with 3D curve handles (blue), and geometric detail crafting where users may add geometric surface details by drawing sketches (red) on the coarse models. The two animalmorphic head models in this figure were created by a novice user without any 3D modeling experiences in ten minutes. Please refer to our [project page](https://zhongjinluo.github.io/SimpModeling/) for more demonstrations.
+We present *SimpModeling*, a novel sketching system designed for amateur users to create desired animalmorphic heads. It provides two stages for mesh modeling: coarse shape sketching where users may create coarse head models with 3D curve handles (blue), and geometric detail crafting where users may add geometric surface details by drawing sketches (red) on the coarse models. The two animalmorphic head models in this figure were created by a novice user without any 3D modeling experiences in ten minutes. Please refer to our project page for more demonstrations.
+
+##### | [Paper](https://arxiv.org/abs/2108.02548) | [Project](https://zhongjinluo.github.io/SimpModeling/) | 
 
 ## Demo
 
