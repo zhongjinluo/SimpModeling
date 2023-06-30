@@ -1,0 +1,415 @@
+from torch.utils.data import Dataset
+import numpy as np
+import os
+import random
+import torchvision.transforms as transforms
+from PIL import Image, ImageOps
+import cv2
+import torch
+from PIL.ImageFilter import GaussianBlur
+import trimesh
+import logging
+import scipy.io as sio
+import matplotlib as mpl
+mpl.use('Agg')
+from matplotlib import pyplot as plt
+
+log = logging.getLogger('trimesh')
+log.setLevel(40)
+
+def crop_image(img, rect):
+    x, y, w, h = rect
+
+    left = abs(x) if x < 0 else 0
+    top = abs(y) if y < 0 else 0
+    right = abs(img.shape[1]-(x+w)) if x + w >= img.shape[1] else 0
+    bottom = abs(img.shape[0]-(y+h)) if y + h >= img.shape[0] else 0
+    
+    if img.shape[2] == 4:
+        color = [0, 0, 0, 0]
+    else:
+        color = [0, 0, 0]
+    new_img = cv2.copyMakeBorder(img, top, bottom, left, right, cv2.BORDER_CONSTANT, value=color)
+
+    x = x + left
+    y = y + top
+
+    return new_img[y:(y+h),x:(x+w),:]
+
+def load_trimesh(root_dir):
+    folders = os.listdir(root_dir)
+    meshs = {}
+    for i, f in enumerate(folders):
+        for j in os.listdir(os.path.join(root_dir, f)):
+            if (j[-4:] == '.obj'):
+                #print(os.path.join(root_dir, f, j))
+                meshs[f+'/'+j[:-4]] = trimesh.load(os.path.join(root_dir, f, j), process = False)
+    #print(meshs.keys())
+    return meshs    
+
+def save_samples_truncted_prob(fname, points, prob):
+    '''
+    Save the visualization of sampling to a ply file.
+    Red points represent positive predictions.
+    Green points represent negative predictions.
+    :param fname: File name to save
+    :param points: [N, 3] array of points
+    :param prob: [N, 1] array of predictions in the range [0~1]
+    :return:
+    '''
+    r = (prob > 0.5).reshape([-1, 1]) * 255
+    g = (prob < 0.5).reshape([-1, 1]) * 255
+    b = np.zeros(r.shape)
+    #print('=== points shape: ', points.shape)
+    #print('=== prob shape: ', prob.shape)
+    #print('=== r shape: ', r.shape)
+    #print('=== g shape: ', g.shape)
+    #print('=== b shape: ', b.shape)
+    to_save = np.concatenate([points, r, g, b], axis=-1)
+    return np.savetxt(fname,
+                      to_save,
+                      fmt='%.6f %.6f %.6f %d %d %d',
+                      comments='',
+                      header=(
+                          'ply\nformat ascii 1.0\nelement vertex {:d}\nproperty float x\nproperty float y\nproperty float z\nproperty uchar red\nproperty uchar green\nproperty uchar blue\nend_header').format(
+                          points.shape[0])
+                      )
+
+
+class TrainDataset_Cari_Landmark(Dataset):
+    @staticmethod
+    def modify_commandline_options(parser, is_train):
+        return parser
+
+    def __init__(self, opt, phase='train'):
+        self.opt = opt
+        self.projection_mode = 'orthogonal'
+
+        # Path setup
+        self.root = self.opt.dataroot
+        self.RENDER = os.path.join(self.root, 'RENDER')
+        self.MASK = os.path.join(self.root, 'MASK')
+        self.OBJ = os.path.join(self.root, 'GEO')
+        self.CALIB = os.path.join(self.root, 'CALIB')
+        self.NORM = os.path.join(self.root, 'NORM')
+        self.LM = os.path.join(self.root, '3dLM')
+        self.LMIND = os.path.join(self.root, 'LMIND')
+
+        self.B_MIN = np.array([-128, -128, -128])
+        self.B_MAX = np.array([128, 128, 128])
+        #self.B_MIN = np.array([-0, -0, -0])
+        #self.B_MAX = np.array([0, 0, 0])
+        #self.B_MIN = np.array([-2, -2, -2])
+        #self.B_MAX = np.array([2, 2, 2])
+        
+        self.is_train = (phase == 'train')
+        self.load_size = self.opt.loadSize
+
+        self.num_sample_inout = self.opt.num_sample_inout
+        self.num_sample_color = self.opt.num_sample_color
+
+        self.subjects = self.get_subjects()
+        self.augs = 6
+
+        # PIL to tensor
+        self.to_tensor = transforms.Compose([
+            transforms.Resize(self.load_size),
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        ])
+
+        # augmentation
+        self.aug_trans = transforms.Compose([
+            transforms.ColorJitter(brightness=opt.aug_bri, contrast=opt.aug_con, saturation=opt.aug_sat,
+                                   hue=opt.aug_hue)
+        ])
+
+        self.mesh_dic = load_trimesh(self.OBJ)
+    def get_img_info_abandon(self, subject):
+        calib_list = []
+        render_list = []
+        mask_list = []
+        extrinsic_list = []
+        
+        files = os.listdir(os.path.join(self.RENDER, subject))
+        for file in files:
+            render_path = os.path.join(self.RENDER, subject, file)
+            mask_path = os.path.join(self.MASK, subject, file)
+            calib_path = os.path.join(self.CALIB, subject, file[:-4]+'.mat')
+            
+            mask = Image.open(mask_path).convert('L')
+            render = Image.open(render_path).convert('RGB')
+            
+            if self.is_train:
+                if self.opt.aug_blur > 0.00001:
+                    blur = GaussianBlur(np.random.uniform(0, self.opt.aug_blur))
+                    render = render.filter(blur)
+
+            cam_matrix = sio.loadmat(calib_path)
+            extrinsic = cam_matrix['Ext']
+
+            intrinsic = cam_matrix['Int']
+            #calib = torch.Tensor(np.matmul(intrinsic, extrinsic)).float()
+            calib = torch.Tensor(intrinsic).float()
+            extrinsic = torch.Tensor(extrinsic).float()
+
+            mask = transforms.Resize(self.load_size)(mask)
+            mask = transforms.ToTensor()(mask).float()
+            mask_list.append(mask)
+
+            render = self.to_tensor(render)
+            render = mask.expand_as(render) * render
+
+            render_list.append(render)
+            calib_list.append(calib)
+            extrinsic_list.append(extrinsic)
+
+        return {
+            'img': torch.stack(render_list, dim=0),
+            'calib': torch.stack(calib_list, dim=0),
+            'extrinsic': torch.stack(extrinsic_list, dim=0),
+            'mask': torch.stack(mask_list, dim=0)
+        }   
+        
+    def get_img_info(self, subject):
+        calib_list = []
+        render_list = []
+        mask_list = []
+        extrinsic_list = []
+        intrinsic_list = []
+        
+        render_path = os.path.join(self.RENDER, subject+'.jpg')
+        mask_path = os.path.join(self.MASK, subject+'.jpg')
+        calib_path = os.path.join(self.CALIB, subject+'.mat')
+        fnorm_path = os.path.join(self.NORM, subject+'_f.jpg')
+        bnorm_path = os.path.join(self.NORM, subject+'_b.jpg')
+            
+        mask = Image.open(mask_path).convert('L')
+        render = Image.open(render_path).convert('RGB')
+        fnorm = Image.open(fnorm_path).convert('RGB')
+        bnorm = Image.open(bnorm_path).convert('RGB')
+        
+        fnorm = fnorm.resize((512, 512))
+        bnorm = bnorm.resize((512, 512))
+
+        cam_matrix = sio.loadmat(calib_path)
+        extrinsic = cam_matrix['Ext']
+
+        intrinsic = cam_matrix['Int']
+        #calib = torch.Tensor(np.matmul(intrinsic, extrinsic)).float()
+        calib = torch.Tensor(np.identity(4)).float()
+        calib[1,1] = -1
+        calib = (calib/256) /0.5
+        extrinsic = torch.Tensor(extrinsic).float()
+        intrinsic = torch.Tensor(intrinsic).float()
+
+        mask = transforms.Resize(self.load_size)(mask)
+        mask = transforms.ToTensor()(mask).float()
+        mask_list.append(mask)
+
+        if self.is_train:
+            render = self.aug_trans(render)
+            if self.opt.aug_blur > 0.00001:
+                blur = GaussianBlur(np.random.uniform(0, self.opt.aug_blur))
+                render = render.filter(blur)
+
+        render = self.to_tensor(render)
+        render = mask.expand_as(render) * render
+        
+        fnorm = self.to_tensor(fnorm)
+        bnorm = self.to_tensor(bnorm)
+        #print("=== render: ", render.shape)
+        #print("=== fnorm: ", fnorm.shape)
+        #print("=== bnorm: ", bnorm.shape)
+        
+        render = torch.cat([render, fnorm, bnorm], 0)
+        #print("=== render: ", render.shape)
+
+        render_list.append(render)
+        calib_list.append(calib)
+        intrinsic_list.append(intrinsic)
+        extrinsic_list.append(extrinsic)
+        #fnorm_list.append(fnorm)
+        #bnorm_list.append(bnorm)
+
+        return {
+            'img': torch.stack(render_list, dim=0),
+            'calib': torch.stack(calib_list, dim=0),
+            'intrinsic': torch.stack(intrinsic_list, dim=0),
+            'mask': torch.stack(mask_list, dim=0),
+            'extrinsic':  torch.stack(extrinsic_list, dim=0)
+            #'fnorm': torch.stack(fnorm_list, dim=0),
+            #'bnorm': torch.stack(bnorm_list, dim=0)
+        }   
+        
+    def get_subjects(self):
+        #all_subjects = os.listdir(self.RENDER)
+        all_subjects = []
+        persons = os.listdir(self.RENDER)
+        #print('=== subjects: ', len(persons))
+        for person in persons:
+            temp = os.listdir(os.path.join(self.RENDER, person))
+            for file in temp:
+               # print('=== ', os.path.join(self.LM, person, file[:-4]+'.txt'), '\n=== ', os.path.exists(os.path.join(self.LM, person, file[:-4]+'.txt')))
+               # if os.path.exists(os.path.join(self.LM, person, file[:-4]+'.txt')):
+               # print('=== get subject: ', os.path.join(self.LMIND, 'lm_mesh_' + person.replace(' ', '+') + '_' + file[:-4] + '.txt'))
+                if os.path.exists(os.path.join(self.LMIND, 'lm_mesh_' + person.replace(' ', '+') + '_' + file[:-4] + '.txt')):
+                    all_subjects.append(person+'/'+file[:-4])
+        
+        #print(os.path.join(self.LM, person, file[:-4]+'.txt'))
+        #print('=== all_subjects: \n', all_subjects)
+        var_subjects = np.loadtxt(os.path.join(self.root, 'val.txt'), dtype=str, delimiter='\n')
+        if len(var_subjects) == 0:
+            return all_subjects
+
+        if self.is_train:
+            return sorted(list(set(all_subjects) - set(var_subjects)))
+        else:
+            return sorted(list(var_subjects))
+
+    def __len__(self):
+        return len(self.subjects) * self.augs
+
+    def select_sampling_method(self, subject):
+        if not self.is_train:
+            random.seed(1991)
+            np.random.seed(1991)
+            torch.manual_seed(1991)
+        mesh = self.mesh_dic[subject]
+        
+        '''
+        landmarks_GT = np.loadtxt(os.path.join(self.LM, subject + '.txt'))
+        f = open(os.path.join(self.LM, subject + '.txt'))
+        line = f.readline()
+        scale = float(line[2:-1])
+        f.close()
+        
+        temp = mesh.vertices
+        landmarks_GT[:,2] = (landmarks_GT[:,2] + 1) * scale + np.min(temp[:,2])
+        landmarks_GT[:,1] = 512 - landmarks_GT[:,1]
+        
+        landmarks_GT = landmarks_GT / 2 - 128
+        #print('=== lm_GT', np.max(landmarks_GT,0), '; \n', np.min(landmarks_GT,0))
+        '''
+        lm_ind = np.loadtxt(os.path.join(self.LMIND, 'lm_mesh_' + subject.replace('/', '_').replace(' ', '+') + '.txt'))
+        #print('=== landmarks_GT: \n', lm_ind)
+        landmarks_GT = mesh.vertices[lm_ind.astype('int')]
+        #print(landmarks_GT.shape)
+        #print(landmarks_GT)
+        #print('=== mesh verts: ', (mesh.vertices).shape)
+        #print(mesh.vertices)
+        #print(mesh.faces)
+        #print(subject)
+        #print('=== lmGT: \n', landmarks_GT)
+        #plt.scatter(landmarks_GT[:,0], landmarks_GT[:,1], c='r', marker = 'o')
+        #for idx in range(11):
+        #    if (idx == 10) or (idx == 12) or (idx == 14) or (idx == 18) or (idx == 20) or (idx == 22) or (idx == 28) or (idx == 31) or (idx == 34) or (idx == 37):
+        #        continue
+        #    print('=== point ', idx, ': ', [landmarks_GT[idx,0], landmarks_GT[idx,1]], '-->', [landmarks_GT[idx+1, 0], landmarks_GT[idx+1, 1]])
+        #    plt.plot([landmarks_GT[idx,0], landmarks_GT[idx,1]], [landmarks_GT[idx+1, 0], landmarks_GT[idx+1, 1]])
+        #plt.scatter(mesh.vertices[:,0], mesh.vertices[:,1], c='b', marker = 'x')
+        #plt.savefig('./test.png', dpi=300)
+        #plt.scatter(mesh.vertices[:,0], mesh.vertices[:,1], c='b', marker = 'x')
+        #plt.savefig('./test1.png', dpi=300)
+        #exit()
+        surface_points, _ = trimesh.sample.sample_surface(mesh, 4 * self.num_sample_inout)
+        '''
+        points_label = []
+        for i in range(len(surface_points)):
+            for j in range(len(landmarks_GT)):
+                if np.linalg.norm(surface_points - landmarks_GT, ord=2))<0.25:
+                    points_label.append(i)
+                    break
+        '''            
+        sample_points = surface_points + np.random.normal(scale=self.opt.sigma*2, size=surface_points.shape)
+
+        # add random points within image space
+        length = self.B_MAX - self.B_MIN
+        random_points = np.random.rand(self.num_sample_inout // 4, 3) * length + self.B_MIN
+        sample_points = np.concatenate([sample_points, random_points], 0)
+        np.random.shuffle(sample_points)
+
+        inside = mesh.contains(sample_points)
+        inside_points = sample_points[inside]
+        outside_points = sample_points[np.logical_not(inside)]
+
+        nin = inside_points.shape[0]
+        inside_points = inside_points[
+                        :self.num_sample_inout // 2] if nin > self.num_sample_inout // 2 else inside_points
+        outside_points = outside_points[
+                         :self.num_sample_inout // 2] if nin > self.num_sample_inout // 2 else outside_points[
+                                                                                               :(self.num_sample_inout - nin)]
+
+        samples = np.concatenate([inside_points, outside_points], 0).T
+        #print('=== samples: \n', np.max(samples, 1), '=== min: ', np.min(samples, 1))
+        points_label = []
+        for i in range(samples.shape[1]):
+            for j in range(len(landmarks_GT)):
+                #print('=== sample: ', samples[:, i])
+                #print('=== landmarkGT: ', landmarks_GT[j, :])
+                #print('=== L2Norm: ', np.linalg.norm(samples[:, i] - landmarks_GT[j, :], ord=2))
+                if np.linalg.norm(samples[:, i] - landmarks_GT[j, :], ord=2)<5:
+                    points_label.append(i)
+                    break
+        #print('=== pL: ', len(points_label))
+        weights = np.ones((1, samples.shape[1]))
+        #print('=== labels: ', labels.shape)
+        weights[0,points_label] = 5
+        labels = np.concatenate([np.ones((1, inside_points.shape[0])), np.zeros((1, outside_points.shape[0]))], 1)
+        
+        #print(subject)
+        save_samples_truncted_prob('out_lm.ply', samples.T, labels.T)
+        #exit()
+
+        samples = torch.Tensor(samples).float()
+        labels = torch.Tensor(labels).float()
+        
+        del mesh
+
+        return {
+            'samples': samples,
+            'labels': labels,
+            'weights': weights
+        }
+
+
+    def get_item(self, index):
+        # In case of a missing file or IO error, switch to a random sample instead
+        # try:
+        sid = index // self.augs
+        
+        # name of the subject 'rp_xxxx_xxx'
+        #print('=== sid: ',sid)
+        #print('=== subjects: ', len(self.subjects))
+        subject = self.subjects[sid]
+        res = {
+            'name': subject,
+            'mesh_path': os.path.join(self.OBJ, subject + '.obj'),
+            'sid': sid,
+            'b_min': self.B_MIN,
+            'b_max': self.B_MAX,
+        }
+        render_data = self.get_img_info(subject)
+        res.update(render_data)
+
+        if self.opt.num_sample_inout:
+            sample_data = self.select_sampling_method(subject)
+            res.update(sample_data)
+        
+        # img = np.uint8((np.transpose(render_data['img'][0].numpy(), (1, 2, 0)) * 0.5 + 0.5)[:, :, ::-1] * 255.0)
+        # rot = render_data['calib'][0,:3, :3]
+        # trans = render_data['calib'][0,:3, 3:4]
+        # pts = torch.addmm(trans, rot, sample_data['samples'][:, sample_data['labels'][0] > 0.5])  # [3, N]
+        # pts = 0.5 * (pts.numpy().T + 1.0) * render_data['img'].size(2)
+        # for p in pts:
+        #     img = cv2.circle(img, (p[0], p[1]), 2, (0,255,0), -1)
+        # cv2.imshow('test', img)
+        # cv2.waitKey(1)
+
+        return res
+        # except Exception as e:
+        #     print(e)
+        #     return self.get_item(index=random.randint(0, self.__len__() - 1))
+
+    def __getitem__(self, index):
+        return self.get_item(index)
