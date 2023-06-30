@@ -15,7 +15,7 @@ We present *SimpModeling*, a novel sketching system designed for amateur users t
 
 ## Demo
 
-
+https://github.com/zhongjinluo/SimpModeling/assets/22856460/ac7dd7ba-a533-476f-b9c4-cf157507227e
 
 ## Usage
 
