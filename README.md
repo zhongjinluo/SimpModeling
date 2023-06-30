@@ -23,14 +23,14 @@ https://github.com/zhongjinluo/SimpModeling/assets/22856460/ac7dd7ba-a533-476f-b
 
 This system has been tested with Python 3.6, PyTorch 1.7.1, CUDA 10.2 on Ubuntu 18.04. 
 
-- Start by cloning this repo
+- Start by cloning this repo:
 
   ```
   git clone git@github.com:zhongjinluo/SimpModeling.git
   cd SimpModeling
   ```
 
-- Download pre-compiled user interface and checkpoints for backend algorithms from [simpmodeling_files.zip](https://cuhko365-my.sharepoint.com/:u:/g/personal/220019015_link_cuhk_edu_cn/EWSVCrwYdb1Lj3FrQn8a9O0B1xD-2c_IIISJ-1v-ZbtMWQ?e=CHrlxx) and unzip it
+- Download pre-compiled user interface and checkpoints for backend algorithms from [simpmodeling_files.zip](https://cuhko365-my.sharepoint.com/:u:/g/personal/220019015_link_cuhk_edu_cn/EWSVCrwYdb1Lj3FrQn8a9O0B1xD-2c_IIISJ-1v-ZbtMWQ?e=CHrlxx) and unzip it:
 
   ```
   unzip app.zip # /path-to-repo/app
@@ -39,7 +39,7 @@ This system has been tested with Python 3.6, PyTorch 1.7.1, CUDA 10.2 on Ubuntu 
   mv simpmodeling_files/fine/model/netG_latest /path-to-repo/fine/model/checkpoints/example/
   ```
 
-- After preparing the above file, the directory structure is expected as follows
+- After preparing the above file, the directory structure is expected as follows:
 
   ```
   ├── app
@@ -88,14 +88,14 @@ This system has been tested with Python 3.6, PyTorch 1.7.1, CUDA 10.2 on Ubuntu 
   └── README.md
   ```
 
-- Run the backend servers for two-stage modeling
+- Run the backend servers for two-stage modeling:
 
   ```
   cd /path-to-repo/coarse && bash server.sh
   cd /path-to-repo/fine && bash server.sh
   ```
 
-- Launch the user interface and enjoy it
+- Launch the user interface and enjoy it:
 
   ```
   cd app/ && bash run.sh
