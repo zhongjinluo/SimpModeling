@@ -21,7 +21,15 @@ https://github.com/zhongjinluo/SimpModeling/assets/22856460/ac7dd7ba-a533-476f-b
 
 ## Usage
 
-This system has been tested with Python 3.6, PyTorch 1.7.1, CUDA 10.2 on Ubuntu 18.04. 
+This system has been tested with Python 3.8, PyTorch 1.7.1, CUDA 10.2 on Ubuntu 18.04. 
+
+- Installation:
+
+  ```
+  conda create --name SimpModeling -y python=3.8
+  conda activate SimpModeling
+  pip install -r requirements.txt
+  ```
 
 - Start by cloning this repo:
 
@@ -101,7 +109,9 @@ This system has been tested with Python 3.6, PyTorch 1.7.1, CUDA 10.2 on Ubuntu 
   cd app/ && bash run.sh
   ```
 
-- If you want to run the backend algorithms on a remote server, you may have to modify  `app/config.ini`. **This repo represents the prototype implementation of our paper. Please use this for research and educational purposes only. This is a research prototype system and made public for demonstration purposes. The user interface runs on Ubuntu 18.04 platforms only and may contain some bugs.**
+- If you want to run the backend algorithms on a remote server, you may have to modify  `app/config.ini`. 
+
+- This repo represents the prototype implementation of our paper. Please use this for research and educational purposes only. This is a research prototype system and made public for demonstration purposes. The user interface runs on Ubuntu 18.04 platforms only and may contain some bugs.
 
 ## Citation
 
