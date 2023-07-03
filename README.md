@@ -113,6 +113,8 @@ This system has been tested with Python 3.8, PyTorch 1.7.1, CUDA 10.2 on Ubuntu 
 
 - This repo represents the prototype implementation of our paper. Please use this for research and educational purposes only. This is a research prototype system and made public for demonstration purposes. The user interface runs on Ubuntu 18.04 platforms only and may contain some bugs.
 
+- If you are interested in sketch-based 3D modeling, you can also refer to [*SketchMetaFace*](https://github.com/zhongjinluo/SketchMetaFace) and [*Sketch2RaBit*](https://github.com/zhongjinluo/Sketch2RaBit).
+
 ## Citation
 
 ```
