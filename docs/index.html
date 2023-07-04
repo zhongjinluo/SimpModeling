@@ -50,12 +50,12 @@
         &nbsp; &nbsp; &nbsp;
     </p>
         
-    <p class="center_text" align="center">
+    <!-- <p class="center_text" align="center">
      <font color="#236B8E"><b>UIST 2021</b></font>
-    </p>
+    </p> -->
 
     <p class="center_text" align="center">
-    <font color="#ce6772"><b>If you are interested in sketch-based 3D modeling, 
+    <font color="#236B8E"><b>If you are interested in sketch-based 3D modeling, 
         you can also refer to <a target="_blank" href="https://zhongjinluo.github.io/SketchMetaFace/"><i>SketchMetaFace</i></a> and <a target="_blank" href="https://github.com/zhongjinluo/Sketch2RaBit/"><i>Sketch2RaBit</i></a>.</font></b>
     </p>
         
@@ -65,17 +65,17 @@
     </center>
     <br>
 
-    <p class="center_text" align="center">
+    <p class="center_text" align="center" style="text-align: justify;">
         Figure 1. We present <i>SimpModeling</i>, a novel sketching system designed for amateur users to create desired animalmorphic heads. It provides two stages for mesh modeling: coarse shape sketching where users may create coarse head models with 3D curve handles (blue), and geometric detail crafting where users may add geometric surface details by drawing sketches (red) on the coarse models. The two animalmorphic head models in this figure were created by a novice user without any 3D modeling experiences in ten minutes.
     </p> 
 
     <h3 class="w3-left-align" id="intro"><b>Introduction</b></h3>
 
-    <p>
+    <p style="text-align: justify;">
         Head shapes play an important role in 3D character design. In this work, we propose <i>SimpModeling</i>, a novel sketch-based system for helping users, especially amateur users, easily model 3D animalmorphic heads - a prevalent kind of heads in character design. Although sketching provides an easy way to depict desired shapes, it is challenging to infer dense geometric information from sparse line drawings. Recently, deepnet-based approaches have been taken to address this challenge and try to produce rich geometric details from very few strokes. However, while such methods reduce users' workload, they would cause less controllability of target shapes. This is mainly due to the uncertainty of the neural prediction. Our system tackles this issue and provides good controllability from three aspects: 1) we separate coarse shape design and geometric detail specification into two stages and respectively provide different sketching means; 2) in coarse shape designing, sketches are used for both shape inference and geometric constraints to determine global geometry, and in geometric detail crafting, sketches are used for carving surface details;  3) in both stages, we use the advanced implicit-based shape inference methods, which have strong ability to handle the domain gap between freehand sketches and synthetic ones used for training. Experimental results confirm the effectiveness of our method and the usability of our interactive system. We also contribute to a dataset of high-quality 3D animal heads, which are manually created by artists. 
     </p>
     
-    <p>            
+    <p style="text-align: justify;">            
         The major contributions of this work are summarized as follows:
             <ul>
                 <li>We design an easy-to-use and controllable sketch modeling interface for animalmorphic head modeling. In particular, it takes around ten minutes for novice users to create a desired animalmorphic head model using only a small number of 3D strokes.</li>
@@ -105,7 +105,7 @@
 
         <!-- <HR>         -->
         <h3 class="w3-left-align" id="dataset"><b>Dataset</b></h3>
-        <p>We propose <i>3DAnimalHead</i>, the largest animalmorphic head dataset by far. Our dataset contains 1,955 high-quality animalmorphic head models manually created by artists, covering 17 common categories. Each animalmorphic head is carefully annotated with contour curves to facilitate future research on 3D animalmorphic head generation.</p>
+        <p style="text-align: justify;">We propose <i>3DAnimalHead</i>, the largest animalmorphic head dataset by far. Our dataset contains 1,955 high-quality animalmorphic head models manually created by artists, covering 17 common categories. Each animalmorphic head is carefully annotated with contour curves to facilitate future research on 3D animalmorphic head generation.</p>
         
         <h5 class="w3-text-grey" id="dataset_exam"><b>Data Examples</b></h3>
   
@@ -132,7 +132,7 @@
         <!-- <HR> -->
         <h3 class="w3-left-align" id="experiments"><b>Evaluation</b></h3>
         <h5 class="w3-text-grey" id="exp_comp"><b>Usability Study</b></h3>
-        <p>
+        <p style="text-align: justify;">
             Since our proposed system is designed to assist users in instantiating their ideas, in the usability
             study, we asked the participants to create whatever they wanted with our system within 30 minutes and did not ask
             them to create a specific number of models. We observed that each participant created on average 3 to 4 models within
@@ -156,7 +156,7 @@
         </p>         -->
         
         <h5 class="w3-text-grey" id="exp_rigging"><b>Comparison Study</b></h3>
-        <p>
+        <p style="text-align: justify;">
             After thoroughly reviewing the existing open-source sketch-based modeling systems, we choose
             <a href="https://dl.acm.org/doi/10.1145/1276377.1276429">FiberMesh</a> and <a href="https://ieeexplore.ieee.org/document/9222121">SAniHead</a>, which are most relevant to our work, for comparison. In the Comparison Study, each user was
             given different reference images and asked to create 3D animalmorphic heads according to the reference image with
@@ -172,7 +172,7 @@
             Figure 4. The models created in the comparison study.
         </p>
         <h5 class="w3-text-grey" id="exp_comp"><b>Results Gallery</b></h3>
-        <p>Figure 5 are sampled results created by amateur users using our system. As seen, given limited time, novice users working with our system can create models with visually appealing shapes and vivid details easily with a few sketch strokes.</p>
+        <p style="text-align: justify;">Figure 5 are sampled results created by amateur users using our system. As seen, given limited time, novice users working with our system can create models with visually appealing shapes and vivid details easily with a few sketch strokes.</p>
         <center>
             <img src="paper-gallery.png" style="max-width:100%" /></a>
         </center><br>  
